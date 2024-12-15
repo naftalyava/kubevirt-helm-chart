@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  kubevirt:
+  - apiVersion: v2
+    appVersion: v1.4.0
+    created: "2024-12-15T18:01:08.212494303+02:00"
+    description: KubeVirt enables running virtual machines on Kubernetes
+    digest: 1fd947362747f6b465d81c6483ab9a837980fff6484b15a7861efb370d584fac
+    name: kubevirt
+    type: application
+    urls:
+    - https://naftalyava.github.io/kubevirt-helm-chart/kubevirt-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-12-15T18:01:08.211343722+02:00"
