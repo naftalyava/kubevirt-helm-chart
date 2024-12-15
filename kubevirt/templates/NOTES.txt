@@ -1,0 +1,5 @@
+Thank you for installing KubeVirt!
+
+To verify that KubeVirt is up and running, execute:
+
+  kubectl -n {{ .Release.Namespace }} wait kv kubevirt --for condition=Available

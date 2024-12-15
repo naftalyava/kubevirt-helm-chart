@@ -1,0 +1,7 @@
+# Optional: Enable emulation if hardware virtualization is not available
+useEmulation: false
+
+# Optional: Configure node placement
+nodePlacement:
+  nodeSelector: {}
+  tolerations: []
