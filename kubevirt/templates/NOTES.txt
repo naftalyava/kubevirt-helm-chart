@@ -1,5 +1,19 @@
-Thank you for installing KubeVirt!
+Thank you for installing {{ .Chart.Name }}.
 
-To verify that KubeVirt is up and running, execute:
+Your release is named {{ .Release.Name }}.
 
-  kubectl -n {{ .Release.Namespace }} wait kv kubevirt --for condition=Available
+To verify that KubeVirt has started, run:
+
+  kubectl -n {{ .Values.kubevirt.namespace }} get kubevirt kubevirt -o=jsonpath="{.status.phase}"
+
+This should show "Deployed" when all components are ready.
+
+To learn more about KubeVirt, visit:
+https://kubevirt.io/user-guide/
+
+To verify the operator deployment, run:
+
+  kubectl -n {{ .Values.kubevirt.namespace }} get deployment virt-operator
+
+For more information on using KubeVirt, please refer to the documentation:
+https://kubevirt.io/docs/

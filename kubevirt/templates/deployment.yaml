@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virt-operator
+  namespace: {{ .Values.kubevirt.namespace }}
+  labels:
+    kubevirt.io: virt-operator
+    {{- include "kubevirt.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.operator.replicas }}
+  selector:
+    matchLabels:
+      kubevirt.io: virt-operator
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        kubevirt.io: virt-operator
+        name: virt-operator
+        prometheus.kubevirt.io: "true"
+        {{- include "kubevirt.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: kubevirt-operator
+      priorityClassName: kubevirt-cluster-critical
+      {{- with .Values.operator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.operator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: virt-operator
+          image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          command:
+            - virt-operator
+          args:
+            - --port
+            - "8443"
+            - -v
+            - "2"
+          env:
+            - name: VIRT_OPERATOR_IMAGE
+              value: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['olm.targetNamespaces']
+            - name: KUBEVIRT_VERSION
+              value: {{ .Values.operator.image.tag }}
+          ports:
+            - containerPort: 8443
+              name: metrics
+              protocol: TCP
+            - containerPort: 8444
+              name: webhooks
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.operator.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: kubevirt-operator-certs
+              mountPath: /etc/virt-operator/certificates
+              readOnly: true
+            - name: profile-data
+              mountPath: /profile-data
+      volumes:
+        - name: kubevirt-operator-certs
+          secret:
+            secretName: kubevirt-operator-certs
+            optional: true
+        - name: profile-data
+          emptyDir: {}

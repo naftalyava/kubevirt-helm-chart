@@ -1,15 +1,84 @@
-# Optional: Enable emulation if hardware virtualization is not available
-useEmulation: false
+# Default values for kubevirt helm chart
+
+kubevirt:
+  # Namespace to deploy KubeVirt components
+  namespace: "kubevirt"
+  
+  # KubeVirt CR configurations
+  imagePullPolicy: IfNotPresent
+  
+  configuration:
+    developerConfiguration:
+      featureGates: []
+  
+  certificateRotateStrategy: {}
+  customizeComponents: {}
+  workloadUpdateStrategy: {}
+
 operator:
   image:
     repository: quay.io/kubevirt/virt-operator
-    tag: "v1.4.0"
+    tag: v1.4.0
     pullPolicy: IfNotPresent
+  
+  replicas: 2
+  
+  resources:
+    requests:
+      cpu: 10m
+      memory: 450Mi
 
-# Optional: Enable emulation if hardware virtualization is not available
-useEmulation: false
+  nodeSelector:
+    kubernetes.io/os: linux
+  
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
 
-# Optional: Configure node placement
-nodePlacement:
-  nodeSelector: {}
-  tolerations: []
+  # RBAC Rules
+  clusterRole:
+    rules:
+      - apiGroups: ["kubevirt.io"]
+        resources: ["kubevirts"]
+        verbs: ["get", "list", "watch", "patch", "update"]
+      - apiGroups: [""]
+        resources: ["serviceaccounts", "services", "endpoints", "pods/exec"]
+        verbs: ["get", "list", "watch", "create", "update", "delete", "patch"]
+      - apiGroups: ["batch"]
+        resources: ["jobs"]
+        verbs: ["get", "list", "watch", "create", "delete", "patch"]
+      # Add other cluster role rules as needed
+  
+  role:
+    rules:
+      - apiGroups: [""]
+        resources: ["secrets"]
+        resourceNames: 
+          - "kubevirt-ca"
+          - "kubevirt-virt-handler-certs"
+          - "kubevirt-operator-certs"
+          - "kubevirt-virt-api-certs"
+        verbs: ["create", "get", "list", "watch", "patch", "delete"]
+      # Add other role rules as needed
+
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: kubevirt.io
+                  operator: In
+                  values:
+                    - virt-operator
+            topologyKey: kubernetes.io/hostname
+
+# Global settings
+global:
+  imageRegistry: ""

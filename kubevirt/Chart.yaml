@@ -1,6 +1,16 @@
 apiVersion: v2
 name: kubevirt
-description: KubeVirt enables running virtual machines on Kubernetes
+description: A Helm chart for deploying KubeVirt virtualization controller and CRDs
 type: application
 version: 0.1.0
-appVersion: "v1.4.0"
+appVersion: "1.4.0"
+keywords:
+  - kubevirt
+  - virtualization
+  - kubernetes
+home: https://kubevirt.io
+sources:
+  - https://github.com/kubevirt/kubevirt
+maintainers:
+  - name: KubeVirt Community
+    url: https://github.com/kubevirt/kubevirt
